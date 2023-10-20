@@ -2,6 +2,7 @@ from django.http import request
 from django.shortcuts import render, redirect
 import requests as req
 import json
+from django.http import JsonResponse
 
 def auth(request):
 
@@ -30,3 +31,17 @@ def auth(request):
 
 def addemployee(request):
     return redirect('/employee')
+
+def recognize(request):
+    data = request.body
+
+    data = json.loads(data.decode('utf-8'))
+
+    # Access specific values from the parsed data
+    param1 = data.get('frame', None)
+
+    res = {
+        'frame' : param1
+    }
+    
+    return JsonResponse(res)

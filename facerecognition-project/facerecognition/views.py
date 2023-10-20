@@ -2,6 +2,7 @@ from django.http import request
 from django.shortcuts import render, redirect
 import requests as req
 import json
+from django.middleware.csrf import get_token
 
 def sessionCheck(token):
     url = "http://127.0.0.1:7889/api/auth/session/check"
@@ -65,10 +66,16 @@ def employee(request):
 
 def attendance(request):
     token = request.session.get('token')
+    csrfToken = get_token(request)
+
     if (sessionCheck(token) == False):
         return redirect('/login')
+    
+    context = {
+        'csrf' : csrfToken
+    }
 
-    return render(request, 'attendance.html')
+    return render(request, 'attendance.html', context)
 
 def addnew(request):
     token = request.session.get('token')

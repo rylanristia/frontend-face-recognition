@@ -12,5 +12,6 @@ urlpatterns = [
     path('add-new/', views.addnew),
     path('login/', views.login),
     path('proceed/auth/', core.auth, name='login_auth'),
-    path('add-employee/', core.addemployee, name='add_employee')
+    path('add-employee/', core.addemployee, name='add_employee'),
+    path('recognize/', core.recognize, name='recognize')
 ]

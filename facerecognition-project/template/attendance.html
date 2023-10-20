@@ -98,22 +98,81 @@
                 <div class="card p-3">
                     <h5>Attendance</h5>
                 </div>
+                <div class="card p-3 mt-3">
+                    <video id="webcam" autoplay></video>
+                    <canvas id="canvas" width="640" height="480" hidden></canvas>
+                </div>
             </div>
         </div>
-        <footer class="footer">
+        <footer class="footer ">
             <div>Crated with brain fucked up! - rylanristia © 2023 Tugas Akhir</div>
-            <div class="ms-auto">Powered by Rylanristia</div>
+            <div class="ms-auto ">Powered by Rylanristia</div>
         </footer>
     </div>
     <!-- CoreUI and necessary plugins-->
-    <script src="{% static 'vendors/@coreui/coreui/js/coreui.bundle.min.js' %}"></script>
-    <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %}"></script>
+    <script src="{% static 'vendors/@coreui/coreui/js/coreui.bundle.min.js' %} "></script>
+    <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %} "></script>
     <!-- Plugins and scripts required by this view-->
-    <script src="{% static 'vendors/chart.js/js/chart.min.js' %}"></script>
-    <script src="{% static 'vendors/@coreui/chartjs/js/coreui-chartjs.js' %}"></script>
-    <script src="{% static 'vendors/@coreui/utils/js/coreui-utils.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'vendors/chart.js/js/chart.min.js' %} "></script>
+    <script src="{% static 'vendors/@coreui/chartjs/js/coreui-chartjs.js' %} "></script>
+    <script src="{% static 'vendors/@coreui/utils/js/coreui-utils.js' %} "></script>
+    <script src="{% static 'js/main.js' %} "></script>
     <script>
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('canvas');
+        // Get user media (video stream)
+        navigator.mediaDevices.getUserMedia({
+                video: true
+            })
+            .then(stream => {
+                videoElement.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+            });
+
+        // Create a canvas context for image processing
+        const canvasContext = canvasElement.getContext('2d');
+
+        // Function to capture a video frame and send it to the server
+        function captureAndSendFrame() {
+
+            // Get the frame as an image data URL
+            const frameData = canvasElement.toDataURL('image/jpeg');
+
+            var csrfToken = '{{ csrf }}'
+
+            // Send the frame data to the server for processing using AJAX
+            fetch('http://127.0.0.1:7899/recognize/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        frame: frameData
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the response as JSON
+                })
+                .then(data => {
+                    // Access the response body data here
+                    console.log('Response Data:', data);
+
+                    // You can now work with the data
+                })
+                .catch(error => {
+                    // Handle errors, e.g., network issues, server errors
+                    console.error('Fetch error:', error);
+                });
+        }
+
+        // Capture and send a frame at regular intervals
+        setInterval(captureAndSendFrame, 1000); // Adjust the interval as needed
     </script>
 
 </body>
