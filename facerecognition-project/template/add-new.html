@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <title>Attendance System</title>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'assets/favicon/android-icon-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'assets/favicon/favicon-96x96.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/favicon/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'assets/favicon/manifest.json' %}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{% static 'assets/favicon/ms-icon-144x144.png' %}">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Vendors styles-->
+    <link rel="stylesheet" href="{% static 'vendors/simplebar/css/simplebar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/vendors/simplebar.css' %}">
+    <!-- Main styles for this application-->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- We use those styles to show code examples, you should remove them in your application.-->
+    <link href="{% static 'css/examples.css' %}" rel="stylesheet">
+    <link href="{% static 'vendors/@coreui/chartjs/css/coreui-chartjs.css' %}" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <!-- sidebar -->
+    <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
+        <div class="sidebar-brand d-none d-md-flex">
+            rylanristia | Attendance System
+        </div>
+        <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Dashboard</a>
+            </li>
+            <li class="nav-title">DATA FACE</li>
+            <li class="nav-item">
+                <a class="nav-link ps-5" href="/employee">Employee</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active ps-5" href="/add-new">new employee</a>
+            </li>
+            <li class="nav-title">ACTION</li>
+            <li class="nav-item">
+                <a class="nav-link ps-5" href="/attendance">Attendance</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="wrapper d-flex flex-column min-vh-100 bg-light">
+        <header class="header header-sticky mb-4">
+            <div class="container-fluid">
+                <button class="header-toggler px-md-0 me-md-3" type="button" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()">
+            <svg class="icon icon-lg">
+              <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-menu"></use>
+            </svg>
+          </button>
+                <a class="header-brand d-md-none" href="#">
+                    <svg width="118" height="46" alt="CoreUI Logo">
+              <use xlink:href="assets/brand/coreui.svg#full"></use>
+            </svg></a>
+                <ul class="header-nav ms-3">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link py-0" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                            <div class="avatar avatar-md"><img class="avatar-img" src="{% static 'assets/img/avatars/8.jpg' %}" alt="user@email.com"></div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end pt-0">
+                            <div class="dropdown-header bg-light py-2">
+                                <div class="fw-semibold">Account</div>
+                            </div>
+                            <a class="dropdown-item" href="#">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="header-divider"></div>
+            <div class="container-fluid">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb my-0 ms-2">
+                        <li class="breadcrumb-item">
+                            <span>Home</span>
+                        </li>
+                        <li class="breadcrumb-item active"><span>Dashboard</span></li>
+                    </ol>
+                </nav>
+            </div>
+        </header>
+        <div class="body flex-grow-1 px-3">
+            <div class="container">
+                <div class="card p-3">
+                    <h5>Add new employee</h5>
+                    <div class="pt-4">
+                        <form action="{% url 'add_employee' %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="xnip">NIP</label>
+                                <input type="number" id="xnip" name="xnip" class="form-control">
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="xname">Name</label>
+                                <input type="text" id="xname" name="xname" class="form-control">
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="xemail">Email</label>
+                                <input type="email" id="xemail" name="xemail" class="form-control">
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="xphone_number">Phone Number</label>
+                                <input type="text" id="xphone_number" name="xphone_number" class="form-control">
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="xaddress">Address</label>
+                                <textarea name="xaddress" id="xaddress" cols="30" rows="10" class="form-control"></textarea>
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="picture"><strong>Picture</strong> <span class="disabled">This picture is used for training the data to get the purity</span></label>
+                                <input type="file" id="xaddress" name="xaddress" class="form-control">
+                            </div>
+                            <button class="btn btn-primary px-4 mt-4" type="submit">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <div>Crated with brain fucked up! - rylanristia © 2023 Tugas Akhir</div>
+            <div class="ms-auto">Powered by Rylanristia</div>
+        </footer>
+    </div>
+    <!-- CoreUI and necessary plugins-->
+    <script src="{% static 'vendors/@coreui/coreui/js/coreui.bundle.min.js' %}"></script>
+    <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %}"></script>
+    <!-- Plugins and scripts required by this view-->
+    <script src="{% static 'vendors/chart.js/js/chart.min.js' %}"></script>
+    <script src="{% static 'vendors/@coreui/chartjs/js/coreui-chartjs.js' %}"></script>
+    <script src="{% static 'vendors/@coreui/utils/js/coreui-utils.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+    </script>
+
+</body>
+
+</html>
