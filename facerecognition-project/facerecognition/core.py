@@ -3,6 +3,9 @@ from django.shortcuts import render, redirect
 import requests as req
 import json
 from django.http import JsonResponse
+import base64
+import os
+from datetime import datetime
 
 def auth(request):
 
@@ -30,7 +33,43 @@ def auth(request):
     return redirect('/')
 
 def addemployee(request):
-    return redirect('/employee')
+    data_to_pass = {
+            'xnip': '220031',
+            'xname': 'Rylanristia',
+            'xemail': 'rylanristia@gmail.com',
+            'xphone_number': '085781077948',
+            'xaddress': 'Lorem'
+        }
+
+    # Build the query string from the data
+    query_string = "&".join([f"{key}={value}" for key, value in data_to_pass.items()])
+
+    # Redirect to another page with query parameters
+    return redirect(f'http://127.0.0.1:7899/add-face/?{query_string}')
+
+def addemployeeimg(request):
+
+    context = {
+        'xnip': request.GET.get('xnip'),
+        'xname': request.GET.get('xname'),
+        'xemail': request.GET.get('xemail'),
+        'xphone_number': request.GET.get('xphone_number'),
+        'xaddress': request.GET.get('xaddress')
+    }
+
+    return render(request, 'add-new-face.html', context)
+
+def addproceed(request):
+    context = {
+        'xnip': request.POST.get('xnip'),
+        'xname': request.POST.get('xname'),
+        'xemail': request.POST.get('xemail'),
+        'xphone_number': request.POST.get('xphone_number'),
+        'xaddress': request.POST.get('xaddress'),
+        'ximage': request.POST.get('image')
+    }
+
+    dd(context)
 
 def recognize(request):
     data = request.body
@@ -38,10 +77,10 @@ def recognize(request):
     data = json.loads(data.decode('utf-8'))
 
     # Access specific values from the parsed data
-    param1 = data.get('frame', None)
+    frame = data.get('frame', None)
 
     res = {
-        'frame' : param1
+        'frame' : frame
     }
-    
+
     return JsonResponse(res)

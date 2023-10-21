@@ -98,29 +98,42 @@
                 <div class="card p-3">
                     <h5>Add new employee</h5>
                     <div class="pt-4">
-                        <form action="{% url 'add_employee' %}" id="imageCaptureForm" method="post" enctype="multipart/form-data">
+                        <form action="{% url 'proceed_img' %}" id="imageCaptureForm" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
-                            <div class="form-group">
+                            <div class="form-group visually-hidden">
                                 <label for="xnip">NIP</label>
-                                <input type="number" id="xnip" name="xnip" class="form-control">
+                                <input type="number" id="xnip" name="xnip" class="form-control" value="{{ xnip }}">
                             </div>
-                            <div class="form-group pt-3">
+                            <div class="form-group visually-hidden pt-3 hidden">
                                 <label for="xname">Name</label>
-                                <input type="text" id="xname" name="xname" class="form-control">
+                                <input type="text" id="xname" name="xname" class="form-control" value="{{ xname }}">
                             </div>
-                            <div class="form-group pt-3">
+                            <div class="form-group visually-hidden pt-3 hidden">
                                 <label for="xemail">Email</label>
-                                <input type="email" id="xemail" name="xemail" class="form-control">
+                                <input type="email" id="xemail" name="xemail" class="form-control" value="{{ xemail }}">
                             </div>
-                            <div class="form-group pt-3">
+                            <div class="form-group visually-hidden pt-3 hidden">
                                 <label for="xphone_number">Phone Number</label>
-                                <input type="text" id="xphone_number" name="xphone_number" class="form-control">
+                                <input type="text" id="xphone_number" name="xphone_number" class="form-control" value="{{ xphone_number }}">
                             </div>
-                            <div class="form-group pt-3">
+                            <div class="form-group visually-hidden pt-3 hidden">
                                 <label for="xaddress">Address</label>
-                                <textarea name="xaddress" id="xaddress" cols="30" rows="10" class="form-control"></textarea>
+                                <textarea name="xaddress" id="xaddress" cols="30" rows="10" class="form-control">{{ xaddress }}</textarea>
                             </div>
-                            <button class="btn btn-primary px-4 mt-4" type="submit">next</button>
+
+                            <!-- image take -->
+                            <div>
+                                <video id="video" autoplay></video>
+                                <button id="capture" class="btn btn-secondary">Capture</button>
+                                <canvas id="canvas" style="display: none;"></canvas>
+                                <input type="text" id="imageInput" name="image" style="display: none;">
+                            </div>
+                            <div>
+                                <img id="capturedImage" style="display: none;">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -139,6 +152,46 @@
     <script src="{% static 'vendors/@coreui/chartjs/js/coreui-chartjs.js' %}"></script>
     <script src="{% static 'vendors/@coreui/utils/js/coreui-utils.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+
+    <script>
+        // Get access to the user's camera
+        navigator.mediaDevices.getUserMedia({
+                video: true
+            })
+            .then(function(stream) {
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.error('Error accessing the camera:', err);
+            });
+
+        // Capture button click event
+        const captureButton = document.getElementById('capture');
+        captureButton.addEventListener('click', function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const imageInput = document.getElementById('imageInput');
+            const capturedImage = document.getElementById('capturedImage');
+
+            // Draw a frame from the video on the canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Show the captured image
+            capturedImage.src = canvas.toDataURL('image/jpeg');
+            capturedImage.style.display = 'block';
+
+            // Encode the captured image as Base64
+            const base64Image = capturedImage.src.split(',')[1];
+
+            // Update the hidden input with the Base64 data
+            imageInput.value = base64Image;
+            imageInput.style.display = 'block';
+        });
+    </script>
 
 </body>
 
