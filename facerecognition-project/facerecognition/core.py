@@ -5,6 +5,11 @@ import json
 from django.http import JsonResponse
 import base64
 import os
+import io 
+from PIL import Image
+import imageio
+import numpy as np
+import cv2
 from datetime import datetime
 
 def auth(request):
@@ -74,13 +79,46 @@ def addproceed(request):
 def recognize(request):
     data = request.body
 
-    data = json.loads(data.decode('utf-8'))
+    # data = json.loads(data.decode('utf-8'))
 
-    # Access specific values from the parsed data
-    frame = data.get('frame', None)
+    # # Access specific values from the parsed data
+    # frame = data.get('frame', None)
 
-    res = {
-        'frame' : frame
-    }
+    # res = {
+    #     'frame' : frame
+    # }
 
-    return JsonResponse(res)
+    # return JsonResponse(res)
+    if request.method == 'POST':
+        # Get the image data from the POST request
+        data = request.body
+
+        data = json.loads(data.decode('utf-8'))
+        frame = data.get('frame', None)
+        
+        try:
+            # Specify the directory where you want to save the images
+            save_directory = '../image_face/'  # Use the absolute path to the directory
+
+            # Ensure the directory exists, creating it if necessary
+            os.makedirs(save_directory, exist_ok=True)
+
+            # Generate a unique filename (you can use a timestamp, random string, etc.)
+            filename = 'face.png'  # You can choose any file extension (e.g., PNG)
+
+            # Decode the Base64 data and save it as an image file
+            image_data = frame.encode('utf-8')  # Convert the string data back to bytes
+            image_path = os.path.join(save_directory, filename)
+
+            with open(image_path, 'wb') as image_file:
+                image_file.write(base64.b64decode(image_data))
+
+            # Return a JSON response with the image path or any other data you want
+            response_data = {'message': 'Image saved successfully', 'image_path': image_path}
+            return JsonResponse(response_data)
+
+        except Exception as e:
+            response_data = {'error': str(e)}
+            return JsonResponse(response_data, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

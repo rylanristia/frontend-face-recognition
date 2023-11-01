@@ -59,14 +59,8 @@
         <header class="header header-sticky mb-4">
             <div class="container-fluid">
                 <button class="header-toggler px-md-0 me-md-3" type="button" onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()">
-            <svg class="icon icon-lg">
-              <use xlink:href="vendors/@coreui/icons/svg/free.svg#cil-menu"></use>
-            </svg>
           </button>
-                <a class="header-brand d-md-none" href="#">
-                    <svg width="118" height="46" alt="CoreUI Logo">
-              <use xlink:href="assets/brand/coreui.svg#full"></use>
-            </svg></a>
+                <a class="header-brand d-md-none" href="#"></a>
                 <ul class="header-nav ms-3">
                     <li class="nav-item dropdown">
                         <a class="nav-link py-0" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
@@ -134,11 +128,6 @@
     <!-- CoreUI and necessary plugins-->
     <script src="{% static 'vendors/@coreui/coreui/js/coreui.bundle.min.js' %}"></script>
     <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %}"></script>
-    <!-- Plugins and scripts required by this view-->
-    <script src="{% static 'vendors/chart.js/js/chart.min.js' %}"></script>
-    <script src="{% static 'vendors/@coreui/chartjs/js/coreui-chartjs.js' %}"></script>
-    <script src="{% static 'vendors/@coreui/utils/js/coreui-utils.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
 
 </body>
 
