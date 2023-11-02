@@ -155,7 +155,7 @@
                             if (!response.ok) {
                                 throw new Error('Network response was not ok');
                             }
-                            return response.json(); // Parse the response as JSON
+                            var response = response.json(); // Parse the response as JSON
                         })
                         .then(data => {
                             console.log('Image sent successfully:', data);
