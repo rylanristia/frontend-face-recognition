@@ -1,16 +1,16 @@
 from django.http import request
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from PIL import Image
+from datetime import datetime
 import requests as req
 import json
-from django.http import JsonResponse
 import base64
 import os
 import io 
-from PIL import Image
 import imageio
 import numpy as np
 import cv2
-from datetime import datetime
 
 def auth(request):
 
@@ -95,19 +95,22 @@ def recognize(request):
 
         data = json.loads(data.decode('utf-8'))
         frame = data.get('frame', None)
-        
+
         try:
             # Specify the directory where you want to save the images
             save_directory = '../image_face/'  # Use the absolute path to the directory
-
+            
             # Ensure the directory exists, creating it if necessary
             os.makedirs(save_directory, exist_ok=True)
 
             # Generate a unique filename (you can use a timestamp, random string, etc.)
-            filename = 'face.png'  # You can choose any file extension (e.g., PNG)
+            # You can choose any file extension (e.g., PNG)
 
             # Decode the Base64 data and save it as an image file
-            image_data = frame.encode('utf-8')  # Convert the string data back to bytes
+            #image_data = frame.encode('utf-8')  # Convert the string data back to bytes
+            content_type, image_data = frame.split(';base64,')
+            image_format = content_type.split('/')[-1]
+            filename = f'face_test.{image_format}'
             image_path = os.path.join(save_directory, filename)
 
             with open(image_path, 'wb') as image_file:

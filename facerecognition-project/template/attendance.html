@@ -94,7 +94,7 @@
                 </div>
                 <div class="card p-3 mt-3">
                     <video id="webcam" autoplay></video>
-                    <canvas id="canvas" width="640" height="480" hidden></canvas>
+                    <img id="capturedImage" style="display: none;">
                 </div>
             </div>
         </div>
@@ -106,15 +106,85 @@
     <!-- CoreUI and necessary plugins-->
     <script src="{% static 'vendors/@coreui/coreui/js/coreui.bundle.min.js' %} "></script>
     <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %} "></script>
+
     <script>
         const videoElement = document.getElementById('webcam');
+        const capturedImage = document.getElementById('capturedImage');
+        let stream;
+        let imageCaptured = false;
+
+        // Get user media (video stream)
+        navigator.mediaDevices.getUserMedia({
+                video: true
+            })
+            .then(videoStream => {
+                stream = videoStream;
+                videoElement.srcObject = videoStream;
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+            });
+
+        // Function to capture a frame from the video and send it
+        function captureAndSendImage() {
+            if (stream) {
+                const canvas = document.createElement('canvas');
+                const canvasContext = canvas.getContext('2d');
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                canvasContext.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const imageDataURL = canvas.toDataURL('image/jpeg');
+                capturedImage.src = imageDataURL;
+                imageCaptured = true;
+
+                var csrfToken = '{{ csrf }}';
+
+                if (imageCaptured) {
+                    const imageDataURL = capturedImage.src;
+                    fetch('http://127.0.0.1:7899/recognize/', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                frame: imageDataURL,
+                            }),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json(); // Parse the response as JSON
+                        })
+                        .then(data => {
+                            console.log('Image sent successfully:', data);
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                        });
+                }
+            }
+        }
+
+        // Capture and send the image at regular intervals (e.g., every 5000 milliseconds)
+        setInterval(captureAndSendImage, 5000); // Adjust the interval as needed
+    </script>
+
+    <!-- <script>
+        const videoElement = document.getElementById('webcam');
         const canvasElement = document.getElementById('canvas');
+
+        // canvasElement.width = videoElement.videoWidth;
+        // canvasElement.height = videoElement.videoHeight;
         // Get user media (video stream)
         navigator.mediaDevices.getUserMedia({
                 video: true
             })
             .then(stream => {
                 videoElement.srcObject = stream;
+                videoElement.play();
+
             })
             .catch(error => {
                 console.error('Error accessing camera:', error);
@@ -127,7 +197,8 @@
         function captureAndSendFrame() {
 
             // Get the frame as an image data URL
-            const frameData = canvasElement.toDataURL('image/jpeg');
+
+            var image = canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
             var csrfToken = '{{ csrf }}'
 
@@ -162,7 +233,7 @@
 
         // Capture and send a frame at regular intervals
         setInterval(captureAndSendFrame, 1000); // Adjust the interval as needed
-    </script>
+    </script> -->
 
 </body>
 
