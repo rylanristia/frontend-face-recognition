@@ -158,6 +158,7 @@
                             var response = response.json(); // Parse the response as JSON
                         })
                         .then(data => {
+                            var responseData = data;
                             console.log('Image sent successfully:', data);
                         })
                         .catch(error => {
@@ -168,7 +169,7 @@
         }
 
         // Capture and send the image at regular intervals (e.g., every 5000 milliseconds)
-        setInterval(captureAndSendImage, 5000); // Adjust the interval as needed
+        setInterval(captureAndSendImage, 2000);
     </script>
 
     <!-- <script>

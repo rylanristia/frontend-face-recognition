@@ -91,6 +91,7 @@
             <div class="container">
                 <div class="card p-3">
                     <h5>Add new employee</h5>
+                    <p id="captureCount">Captures: 0</p>
                     <div class="pt-4">
                         <form action="{% url 'proceed_img' %}" id="imageCaptureForm" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
@@ -98,35 +99,13 @@
                                 <label for="xnip">NIP</label>
                                 <input type="number" id="xnip" name="xnip" class="form-control" value="{{ xnip }}">
                             </div>
-                            <div class="form-group visually-hidden pt-3 hidden">
-                                <label for="xname">Name</label>
-                                <input type="text" id="xname" name="xname" class="form-control" value="{{ xname }}">
-                            </div>
-                            <div class="form-group visually-hidden pt-3 hidden">
-                                <label for="xemail">Email</label>
-                                <input type="email" id="xemail" name="xemail" class="form-control" value="{{ xemail }}">
-                            </div>
-                            <div class="form-group visually-hidden pt-3 hidden">
-                                <label for="xphone_number">Phone Number</label>
-                                <input type="text" id="xphone_number" name="xphone_number" class="form-control" value="{{ xphone_number }}">
-                            </div>
-                            <div class="form-group visually-hidden pt-3 hidden">
-                                <label for="xaddress">Address</label>
-                                <textarea name="xaddress" id="xaddress" cols="30" rows="10" class="form-control">{{ xaddress }}</textarea>
-                            </div>
-
-                            <!-- image take -->
                             <div>
-                                <video id="video" autoplay></video>
-                                <button id="capture" class="btn btn-secondary">Capture</button>
+                                <video id="webcam" autoplay></video>
                                 <canvas id="canvas" style="display: none;"></canvas>
                                 <input type="text" id="imageInput" name="image" style="display: none;">
                             </div>
                             <div>
                                 <img id="capturedImage" style="display: none;">
-                            </div>
-                            <div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
                             </div>
                         </form>
                     </div>
@@ -143,43 +122,82 @@
     <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %}"></script>
 
     <script>
-        // Get access to the user's camera
+        const videoElement = document.getElementById('webcam');
+        const capturedImage = document.getElementById('capturedImage');
+        const captureCount = document.getElementById('captureCount'); // Get the capture count element
+        let stream;
+        let imageCaptured = false;
+        let sendCount = 0;
+
+        // Get user media (video stream)
         navigator.mediaDevices.getUserMedia({
                 video: true
             })
-            .then(function(stream) {
-                const video = document.getElementById('video');
-                video.srcObject = stream;
+            .then(videoStream => {
+                stream = videoStream;
+                videoElement.srcObject = videoStream;
             })
-            .catch(function(err) {
-                console.error('Error accessing the camera:', err);
+            .catch(error => {
+                console.error('Error accessing camera:', error);
             });
 
-        // Capture button click event
-        const captureButton = document.getElementById('capture');
-        captureButton.addEventListener('click', function() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const imageInput = document.getElementById('imageInput');
-            const capturedImage = document.getElementById('capturedImage');
+        // Function to update the capture count display
+        function updateCaptureCount() {
+            captureCount.textContent = 'Captures: ' + sendCount;
+        }
 
-            // Draw a frame from the video on the canvas
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Function to capture a frame from the video and send it
+        function captureAndSendImage() {
+            if (stream) {
+                const canvas = document.createElement('canvas');
+                const canvasContext = canvas.getContext('2d');
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                canvasContext.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                const imageDataURL = canvas.toDataURL('image/jpeg');
+                capturedImage.src = imageDataURL;
+                imageCaptured = true;
 
-            // Show the captured image
-            capturedImage.src = canvas.toDataURL('image/jpeg');
-            capturedImage.style.display = 'block';
+                var csrfToken = '{{ csrf }}';
 
-            // Encode the captured image as Base64
-            const base64Image = capturedImage.src
+                if (imageCaptured) {
+                    const imageDataURL = capturedImage.src;
+                    fetch('http://127.0.0.1:7899/proceed-image', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                frame: imageDataURL,
+                                nip: '{{ xnip }}'
+                            }),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json(); // Parse the response as JSON
+                        })
+                        .then(data => {
+                            var responseData = data;
+                            console.log('Image sent successfully:', data);
+                            sendCount++;
+                            updateCaptureCount(); // Update the capture count display
 
-            // Update the hidden input with the Base64 data
-            imageInput.value = base64Image;
-            imageInput.style.display = 'block';
-        });
+                            if (sendCount < 10) {
+                                setTimeout(captureAndSendImage, 5000); // Send again after a delay
+                            } else {
+                                window.location.href = 'http://127.0.0.1:7899/add-new/';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                        });
+                }
+            }
+        }
+        setInterval(captureAndSendImage, 5000);
     </script>
 
 </body>

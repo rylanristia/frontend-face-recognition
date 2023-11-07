@@ -1,5 +1,6 @@
 from django.http import request
 from django.shortcuts import render, redirect
+from django.contrib import messages
 import requests as req
 import json
 from django.middleware.csrf import get_token
@@ -81,7 +82,7 @@ def addnew(request):
     token = request.session.get('token')
     if (sessionCheck(token) == False):
         return redirect('/login')
-        
+
     return render(request, 'add-new.html')
 
 def login(request):
