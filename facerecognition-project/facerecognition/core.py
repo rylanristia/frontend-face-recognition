@@ -14,17 +14,11 @@ import json
 import base64
 import os
 import io 
-import imageio
 import numpy as np
-import cv2
 import pickle
 import face_recognition
 import datetime
 import requests as req
-
-FILE_STORE = "face_recognition_model.pkl"
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 # AUTHENTICATION
 # AUTHORED BY RYLANRISTIA
@@ -170,39 +164,6 @@ def addproceed(request):
     return JsonResponse(res)
 
 
-
-# ADD RECOGNIZED THE FACE FOR MATCH
-# AUTHORED BY RYLANRISTIA
-def test(X_img_path, knn_clf, distance_threshold=0.4):
-    if not os.path.isfile(X_img_path) or os.path.splitext(X_img_path)[1][1:] not in ALLOWED_EXTENSIONS:
-        raise Exception("Invalid image path: {}".format(X_img_path))
-
-    with open(knn_clf, 'rb') as f:
-        knn_clf = pickle.load(f)
-
-    X_img = face_recognition.load_image_file(X_img_path)
-    X_face_locations = face_recognition.face_locations(X_img)
-
-    if len(X_face_locations) == 0:
-        return []
-
-    faces_encodings = face_recognition.face_encodings(X_img, known_face_locations=X_face_locations)
-    closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=1)
-    are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(X_face_locations))]
-
-    recognized_names = []
-    for pred, rec in zip(knn_clf.predict(faces_encodings), are_matches):
-        if rec:
-            recognized_names.append(pred)
-        else:
-            recognized_names.append("unknown")
-
-    return recognized_names
-
-
-
-
-
 # PREPARATION FOR DATA TRAINING
 # AUTHORED BY RYLANRISTIA
 def train_face(request):
@@ -231,15 +192,13 @@ def train_face(request):
     print("Optimal hyperparameters: n_neighbors={}, metric={}".format(n_neighbors, metric))
 
     metric_algo = 'euclidean'
-    classifier = train("../image_face/", n_neighbors=int(round(n_neighbors)), metric=metric_algo)
+    train("../image_face/", n_neighbors=int(round(n_neighbors)), metric=metric_algo)
 
     res = {
         'message' : 'Successfuly train data!' 
     }
     
     return JsonResponse(res)
-
-
 
 
 # EXECUTE DATA TRAINING
@@ -286,63 +245,3 @@ def optimize_knn_hyperparameters(X, y):
 
     best_hyperparameters, _ = pso(objective_function, lb, ub, swarmsize=10, maxiter=100)
     return best_hyperparameters
-
-
-
-
-
-# FACE RECOGNITION
-# AUTHORED BY RYLANRISTIA
-def recognize(request):
-    data = request.body
-
-    if request.method == 'POST':
-        # Get the image data from the POST request
-        data = request.body
-
-        data = json.loads(data.decode('utf-8'))
-        frame = data.get('frame', None)
-
-        try:
-            # Specify the directory where you want to save the images
-            save_directory = '../image_face_test/'  # Use the absolute path to the directory
-            
-            # Ensure the directory exists, creating it if necessary
-            os.makedirs(save_directory, exist_ok=True)
-
-            # Decode the Base64 data and save it as an image file
-            content_type, image_data = frame.split(';base64,')
-            image_format = content_type.split('/')[-1]
-            filename = f'face_test.{image_format}'
-            image_path = os.path.join(save_directory, filename)
-
-            with open(image_path, 'wb') as image_file:
-                image_file.write(base64.b64decode(image_data))
-
-            image_path = os.path.join(save_directory, 'face_test.jpeg')
-
-            res = test(image_path, knn_clf="trained_knn_model.clf")
-
-            data = {
-                'nip' : res
-            }
-
-            base_url = "http://127.0.0.1:7889"
-            endpoint = "/api/employee/set/attendance"
-            api_url = base_url + endpoint
-            response = req.post(api_url, json=data)
-
-            response_data = response.json()
-
-            
-            context = {
-                'nip' : response_data
-            }
-
-            return JsonResponse(context)
-
-        except Exception as e:
-            response_data = {'error': str(e)}
-            return JsonResponse(response_data, status=400)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=400)

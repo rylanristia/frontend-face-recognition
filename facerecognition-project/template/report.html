@@ -39,7 +39,7 @@
         </div>
         <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
             <li class="nav-item">
-                <a class="nav-link active" href="/">Dashboard</a>
+                <a class="nav-link" href="/">Dashboard</a>
             </li>
             <li class="nav-title">DATA FACE</li>
             <li class="nav-item">
@@ -50,7 +50,7 @@
             </li>
             <li class="nav-title">REPORT</li>
             <li class="nav-item">
-                <a class="nav-link ps-5" href="/form-report">Attendance report</a>
+                <a class="nav-link active ps-5" href="/form-report">Attendance report</a>
             </li>
             <li class="nav-title">ACTION</li>
             <li class="nav-item">
@@ -94,9 +94,30 @@
         <div class="body flex-grow-1 px-3">
             <div class="container">
                 <div class="card p-3">
-                    <h5>Welcome to Attendance System with Face Recognition Computer Vision</h5>
-                    <p>a system created by <strong>Frayudha Ristia Gumelar</strong> which people know him as <strong>Rylanristia</strong> has student identity <strong>2011501174</strong>, leverages face recognition technology to streamline attendance tracking
-                        for research purposes in a Bachelor's Degree program. This user-friendly system offers an efficient way to monitor attendance, simplifying the process for both students and instructors.</p>
+                    <h5>Report</h5>
+                    <div class="table-responsive mt-4">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Checked in</th>
+                                    <th>Checked out</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- do the loop -->
+                                {% for item in result %}
+                                <tr>
+                                    <td>{{ item.date }}</td>
+                                    <td>{{ item.time.checked_in }}</td>
+                                    <td>{{ item.time.checked_out }}</td>
+                                    <td>{{ item.status}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

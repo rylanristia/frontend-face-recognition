@@ -39,7 +39,7 @@
         </div>
         <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
             <li class="nav-item">
-                <a class="nav-link active" href="/">Dashboard</a>
+                <a class="nav-link" href="/">Dashboard</a>
             </li>
             <li class="nav-title">DATA FACE</li>
             <li class="nav-item">
@@ -50,7 +50,7 @@
             </li>
             <li class="nav-title">REPORT</li>
             <li class="nav-item">
-                <a class="nav-link ps-5" href="/form-report">Attendance report</a>
+                <a class="nav-link active ps-5" href="/form-report">Attendance report</a>
             </li>
             <li class="nav-title">ACTION</li>
             <li class="nav-item">
@@ -94,9 +94,39 @@
         <div class="body flex-grow-1 px-3">
             <div class="container">
                 <div class="card p-3">
-                    <h5>Welcome to Attendance System with Face Recognition Computer Vision</h5>
-                    <p>a system created by <strong>Frayudha Ristia Gumelar</strong> which people know him as <strong>Rylanristia</strong> has student identity <strong>2011501174</strong>, leverages face recognition technology to streamline attendance tracking
-                        for research purposes in a Bachelor's Degree program. This user-friendly system offers an efficient way to monitor attendance, simplifying the process for both students and instructors.</p>
+                    <h5>Report Form</h5>
+                    <div class="pt-4">
+                        <form action="{% url 'report' %}" id="imageCaptureForm" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="xnip">NIP</label>
+                                <input type="number" id="xnip" name="xnip" class="form-control">
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="xmonth">Month</label>
+                                <select name="xmonth" id="xmonth" class="form-control">
+                                    <option value="">Choose month</option>
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            <div class="form-group pt-3">
+                                <label for="xyear">Year</label>
+                                <input type="number" id="xyear" name="xyear" class="form-control" placeholder="example: 2023">
+                            </div>
+                            <button class="btn btn-primary px-4 mt-4" type="submit">next</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,8 +138,6 @@
     <!-- CoreUI and necessary plugins-->
     <script src="{% static 'vendors/@coreui/coreui/js/coreui.bundle.min.js' %}"></script>
     <script src="{% static 'vendors/simplebar/js/simplebar.min.js' %}"></script>
-    <script>
-    </script>
 
 </body>
 

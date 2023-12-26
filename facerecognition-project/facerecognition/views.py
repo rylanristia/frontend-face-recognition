@@ -32,6 +32,53 @@ def index(request):
     
     return render(request, 'index.html')
 
+def formreport(request):
+    token = request.session.get('token')
+    if (sessionCheck(token) == False):
+        return redirect('/login')
+    
+    return render(request, 'report-form.html')
+
+def report(request):
+    token = request.session.get('token')
+    if (sessionCheck(token) == False):
+        return redirect('/login')
+
+    xmonth      = request.POST.get('xmonth')
+    xyear       = request.POST.get('xyear')
+    xnip        = request.POST.get('xnip')
+
+    url = "http://127.0.0.1:7889/api/employee/report"
+    params = {"x": token, "xnip": xnip, "xmonth": xmonth, "xyear": xyear}
+
+    response = req.post(url, params=params)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Get the HTML content from the response object
+        data = response.text
+
+        reports = json.loads(data)
+
+        result = []
+
+        for report in reports['data']:
+            result.append(report)
+
+
+    else:
+        # Print an error message if the request failed
+        print(f"Request failed with status code {response.status_code}")
+
+    context = {
+        'result':result
+    }
+
+    # dd(context)
+
+    return render(request, 'report.html', context)
+    
+
 def employee(request):
     token = request.session.get('token')
     if (sessionCheck(token) == False):

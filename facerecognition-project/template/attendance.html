@@ -27,6 +27,26 @@
     <link href="{% static 'css/examples.css' %}" rel="stylesheet">
     <link href="{% static 'vendors/@coreui/chartjs/css/coreui-chartjs.css' %}" rel="stylesheet">
 
+    <style>
+        .card-activity {
+            max-height: 500px;
+            min-height: 500px;
+            overflow-y: scroll;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
 
 </head>
 
@@ -47,6 +67,10 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link ps-5" href="/add-new">new employee</a>
+            </li>
+            <li class="nav-title">REPORT</li>
+            <li class="nav-item">
+                <a class="nav-link ps-5" href="/form-report">Attendance report</a>
             </li>
             <li class="nav-title">ACTION</li>
             <li class="nav-item">
@@ -92,15 +116,38 @@
                 <div class="card p-3">
                     <h5>Attendance</h5>
                 </div>
-                <div class="card p-3 mt-3">
-                    <video id="webcam" autoplay></video>
-                    <img id="capturedImage" style="display: none;">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="card p-3 mt-3">
+                            <video id="webcam" autoplay></video>
+                            <img id="capturedImage" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card card-activity p-3 mt-3" id="result-container">
+                            <p>Activity log</p>
+                            <div class="table-responsive">
+                                <table class="table" id="activity-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Keterangan</th>
+                                            <!-- Tambahkan kolom-kolom lain sesuai kebutuhan -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body">
+                                        <!-- Data akan ditambahkan ke sini secara dinamis -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <footer class="footer ">
-            <div>Crated with brain fucked up! - rylanristia © 2023 Tugas Akhir</div>
-            <div class="ms-auto ">Powered by Rylanristia</div>
+        <footer class="footer">
+            <div>Created with brain - rylanristia © 2023 Tugas Akhir</div>
+            <div class="ms-auto">Powered by Rylanristia</div>
         </footer>
     </div>
     <!-- CoreUI and necessary plugins-->
@@ -110,6 +157,8 @@
     <script>
         const videoElement = document.getElementById('webcam');
         const capturedImage = document.getElementById('capturedImage');
+        const tableBody = document.getElementById('table-body');
+
         let stream;
         let imageCaptured = false;
 
@@ -124,6 +173,11 @@
             .catch(error => {
                 console.error('Error accessing camera:', error);
             });
+
+        // Fungsi untuk memeriksa apakah dataArray adalah objek dengan properti 'success' set false dan properti 'message' yang sesuai
+        function isArrayWithErrorMessage(dataArray) {
+            return Array.isArray(dataArray) && dataArray.length === 1 && dataArray[0].success === false && dataArray[0].message;
+        }
 
         // Function to capture a frame from the video and send it
         function captureAndSendImage() {
@@ -151,15 +205,32 @@
                                 frame: imageDataURL,
                             }),
                         })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            var response = response.json(); // Parse the response as JSON
-                        })
+                        .then(response => response.json())
                         .then(data => {
-                            var responseData = data;
-                            console.log('Image sent successfully:', data);
+                            // Periksa apakah data yang diterima adalah objek
+                            if (data.nip['success'] === false) {
+                                // Objek diterima, lewati pemrosesan ke tabel
+                                console.log('Received object response:', data);
+                            } else {
+                                // Tambahkan data baru ke tabel di bagian atas
+                                const newRow = tableBody.insertRow(0);
+                                const cellNo = newRow.insertCell(0);
+                                const cellNIP = newRow.insertCell(1);
+
+                                // Tambahkan data ke sel-sel tabel
+                                cellNo.innerHTML = tableBody.children.length; // Nomor urut
+
+                                if (typeof data.nip === 'string' && data.nip.toLowerCase().includes('pulang')) {
+                                    // Jika ya, beri style teks berwarna merah
+                                    cellNIP.style.color = 'red';
+                                }
+
+                                cellNIP.innerHTML = data.nip; // Data NIP
+                                // Anda dapat menambahkan kolom-kolom lain sesuai kebutuhan
+
+                                // Uncomment baris di bawah ini jika Anda ingin menampilkan data di console
+                                console.log(data);
+                            }
                         })
                         .catch(error => {
                             console.error('Fetch error:', error);
@@ -171,70 +242,6 @@
         // Capture and send the image at regular intervals (e.g., every 5000 milliseconds)
         setInterval(captureAndSendImage, 2000);
     </script>
-
-    <!-- <script>
-        const videoElement = document.getElementById('webcam');
-        const canvasElement = document.getElementById('canvas');
-
-        // canvasElement.width = videoElement.videoWidth;
-        // canvasElement.height = videoElement.videoHeight;
-        // Get user media (video stream)
-        navigator.mediaDevices.getUserMedia({
-                video: true
-            })
-            .then(stream => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-
-            })
-            .catch(error => {
-                console.error('Error accessing camera:', error);
-            });
-
-        // Create a canvas context for image processing
-        const canvasContext = canvasElement.getContext('2d');
-
-        // Function to capture a video frame and send it to the server
-        function captureAndSendFrame() {
-
-            // Get the frame as an image data URL
-
-            var image = canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-
-            var csrfToken = '{{ csrf }}'
-
-            // Send the frame data to the server for processing using AJAX
-            fetch('http://127.0.0.1:7899/recognize/', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        frame: frameData
-                    }),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json(); // Parse the response as JSON
-                })
-                .then(data => {
-                    // Access the response body data here
-                    console.log('Response Data:', data);
-
-                    // You can now work with the data
-                })
-                .catch(error => {
-                    // Handle errors, e.g., network issues, server errors
-                    console.error('Fetch error:', error);
-                });
-        }
-
-        // Capture and send a frame at regular intervals
-        setInterval(captureAndSendFrame, 1000); // Adjust the interval as needed
-    </script> -->
 
 </body>
 
