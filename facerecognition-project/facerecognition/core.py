@@ -48,6 +48,12 @@ def auth(request):
     return redirect('/')
 
 
+# LOGOUT
+# AUTHORED BY RYLANRISTIA
+def logout(request):
+    del request.session['token']
+    return redirect('/login')
+
 
 # ADD NEW EMPLOYEE
 # AUTHORED BY RYLANRISTIA

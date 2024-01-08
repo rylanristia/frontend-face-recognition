@@ -15,6 +15,7 @@ urlpatterns = [
     path('add-new/', views.addnew, name='add'),
     path('login/', views.login),
     path('proceed/auth/', core.auth, name='login_auth'),
+    path('logout/', core.logout, name="logout"),
     path('add-employee/', core.addemployee, name='add_employee'),
     path('recognize/', face.recognize, name='recognize'),
     path('add-face/', core.addemployeeimg, name='addimg'),
